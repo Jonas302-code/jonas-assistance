@@ -1,233 +1,136 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jonas Assistance - IA</title>
-<style>
-  /* ===== Reset et base ===== */
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; 
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* ===== Header ===== */
-  header {
-    background: #121f3e;
-    padding: 1.5rem 2rem;
-    text-align: center;
-    font-size: 2.2rem;
-    font-weight: 900;
-    letter-spacing: 3px;
-    color: #ffd166;
-    text-shadow: 0 0 10px #f4a261;
-    user-select: none;
-  }
-
-  /* ===== Chat container ===== */
-  #chat {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 1.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: #ffd166 #1b2a40;
-  }
-  #chat::-webkit-scrollbar {
-    width: 10px;
-  }
-  #chat::-webkit-scrollbar-track {
-    background: #1b2a40;
-    border-radius: 10px;
-  }
-  #chat::-webkit-scrollbar-thumb {
-    background-color: #ffd166;
-    border-radius: 10px;
-    border: 2px solid #1b2a40;
-  }
-
-  /* ===== Messages ===== */
-  .message {
-    max-width: 70%;
-    padding: 14px 22px;
-    border-radius: 25px;
-    line-height: 1.4;
-    font-size: 1.1rem;
-    box-shadow: 0 8px 15px rgb(0 0 0 / 0.2);
-    animation: fadeInUp 0.3s ease forwards;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-  }
-  .user {
-    align-self: flex-end;
-    background: #ffd166;
-    color: #2c3e50;
-    border-bottom-right-radius: 0;
-  }
-  .bot {
-    align-self: flex-start;
-    background: #264653;
-    color: #f0f0f0;
-    border-bottom-left-radius: 0;
-  }
-
-  @keyframes fadeInUp {
-    0% {opacity: 0; transform: translateY(10px);}
-    100% {opacity: 1; transform: translateY(0);}
-  }
-
-  /* ===== Footer / Input ===== */
-  footer {
-    background: #121f3e;
-    padding: 1rem 1.5rem;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    box-shadow: 0 -5px 15px rgb(0 0 0 / 0.25);
-  }
-  input[type="text"] {
-    flex-grow: 1;
-    border: none;
-    padding: 14px 20px;
-    font-size: 1.1rem;
-    border-radius: 30px;
-    outline: none;
-    background-color: #1b2a40;
-    color: #f0f0f0;
-    box-shadow: inset 0 0 8px rgb(255 209 102 / 0.4);
-    transition: background-color 0.3s ease;
-    font-weight: 500;
-  }
-  input[type="text"]::placeholder {
-    color: #a0a0a0;
-  }
-  input[type="text"]:focus {
-    background-color: #264653;
-  }
-  button {
-    background: #ffd166;
-    border: none;
-    color: #2c3e50;
-    padding: 14px 26px;
-    font-weight: 700;
-    font-size: 1.15rem;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 5px 12px rgb(255 209 102 / 0.6);
-    transition: background-color 0.3s ease, transform 0.15s ease;
-    user-select: none;
-  }
-  button:hover {
-    background: #f4a261;
-    transform: scale(1.05);
-  }
-  button:active {
-    transform: scale(0.95);
-  }
-
-  /* ===== Popup ===== */
-  #overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 32, 39, 0.85);
-    display: none;
-    z-index: 900;
-  }
-  #addAnswerPopup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(145deg, #264653, #1b2a40);
-    border-radius: 20px;
-    padding: 25px 30px;
-    box-shadow: 0 0 30px #ffd166aa;
-    display: none;
-    flex-direction: column;
-    gap: 15px;
-    width: 95%;
-    max-width: 420px;
-    z-index: 1000;
-    user-select: none;
-  }
-  #addAnswerPopup div:first-child {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: #ffd166;
-    user-select: text;
-  }
-  #newAnswerInput {
-    width: 100%;
-    min-height: 90px;
-    resize: vertical;
-    border-radius: 15px;
-    border: none;
-    background-color: #1b2a40;
-    color: #f0f0f0;
-    padding: 12px 18px;
-    font-size: 1rem;
-    font-weight: 500;
-    box-shadow: inset 0 0 8px rgb(255 209 102 / 0.35);
-    outline: none;
-    user-select: text;
-  }
-  #newAnswerInput::placeholder {
-    color: #a0a0a0;
-  }
-  #saveAnswerBtn {
-    align-self: flex-end;
-    background: #ffd166;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 28px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #2c3e50;
-    cursor: pointer;
-    box-shadow: 0 5px 12px rgb(255 209 102 / 0.6);
-    user-select: none;
-    transition: background-color 0.3s ease, transform 0.15s ease;
-  }
-  #saveAnswerBtn:hover {
-    background: #f4a261;
-    transform: scale(1.05);
-  }
-  #saveAnswerBtn:active {
-    transform: scale(0.95);
-  }
-
-  /* ===== Responsive ===== */
-  @media (max-width: 600px) {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jonas Assistance - IA</title>
+  <style>
+    /* Design sombre et moderne */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
     header {
-      font-size: 1.7rem;
+      background-color: #1f1f1f;
       padding: 1rem;
-      letter-spacing: 2px;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: #90caf9;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+    #chat {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 12px;
+      line-height: 1.3;
+      word-wrap: break-word;
+    }
+    .user {
+      align-self: flex-end;
+      background: #64b5f6;
+      color: #000;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #333;
+      color: #eee;
+      border-bottom-left-radius: 0;
     }
     footer {
-      padding: 0.8rem 1rem;
+      background-color: #1f1f1f;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
     }
     input[type="text"] {
+      flex-grow: 1;
+      border: none;
+      padding: 12px;
       font-size: 1rem;
-      padding: 12px 15px;
+      border-radius: 20px;
+      outline: none;
+      background-color: #222;
+      color: #eee;
+      transition: background-color 0.3s ease;
+    }
+    input[type="text"]:focus {
+      background-color: #333;
     }
     button {
+      background-color: #90caf9;
+      border: none;
+      border-radius: 20px;
       padding: 12px 20px;
       font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: #000;
+      font-weight: bold;
     }
-  }
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    button:hover {
+      background-color: #64b5f6;
+    }
+    /* Popup pour ajouter réponse */
+    #addAnswerPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #222;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 15px #90caf9;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+      width: 90%;
+      max-width: 400px;
+    }
+    #addAnswerPopup textarea {
+      width: 100%;
+      height: 80px;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: #eee;
+      padding: 10px;
+      font-size: 1rem;
+      resize: none;
+      outline: none;
+    }
+    #addAnswerPopup button {
+      align-self: flex-end;
+      background-color: #90caf9;
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      z-index: 900;
+    }
+  </style>
 </head>
 <body>
 
@@ -237,18 +140,18 @@
 
 <footer>
   <input id="userInput" type="text" placeholder="Pose ta question..." autocomplete="off" />
-  <button id="sendBtn" aria-label="Envoyer la question">Envoyer</button>
+  <button id="sendBtn">Envoyer</button>
 </footer>
 
-<div id="overlay" tabindex="-1"></div>
-<div id="addAnswerPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
-  <div id="popupTitle">Je ne connais pas la réponse, peux-tu me la donner ?</div>
-  <textarea id="newAnswerInput" placeholder="Ta réponse ici..." aria-describedby="popupTitle"></textarea>
+<div id="overlay"></div>
+<div id="addAnswerPopup">
+  <div>Je ne connais pas la réponse, peux-tu me la donner ?</div>
+  <textarea id="newAnswerInput" placeholder="Ta réponse ici..."></textarea>
   <button id="saveAnswerBtn">Enregistrer</button>
 </div>
 
 <script>
-  // Base initiale (exemple réduit, à compléter jusqu'à 200 questions)
+  // Base initiale avec 200 questions/réponses simplifiées (extrait ici, tu peux compléter)
   const initialBase = {
     "bonjour": "Bonjour ! Comment puis-je t’aider ?",
     "salut": "Salut !",
@@ -265,7 +168,94 @@
     "combien de continents existe-t-il": "Il y a 7 continents sur Terre.",
     "quel est le plus grand désert": "L’Antarctique est le plus grand désert du monde.",
     "quelle est la formule de l'eau": "La formule chimique de l'eau est H₂O.",
-    "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en
+    "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en 1492.",
+    // ... ajoute ici plein d'autres questions (200 au total)
+  };
+
+  // Chargement base depuis localStorage ou initialBase
+  let base = JSON.parse(localStorage.getItem('jonas_base'));
+  if (!base) {
+    base = initialBase;
+    localStorage.setItem('jonas_base', JSON.stringify(base));
+  }
+
+  const chat = document.getElementById("chat");
+  const userInput = document.getElementById("userInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const addAnswerPopup = document.getElementById("addAnswerPopup");
+  const newAnswerInput = document.getElementById("newAnswerInput");
+  const saveAnswerBtn = document.getElementById("saveAnswerBtn");
+  const overlay = document.getElementById("overlay");
+
+  let pendingQuestion = null;
+
+  function addMessage(text, sender) {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("message", sender);
+    msgDiv.textContent = text;
+    chat.appendChild(msgDiv);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function normalize(text) {
+    return text.trim().toLowerCase().replace(/[\u0300-\u036f]/g, ""); // enlever accents
+  }
+
+  function askQuestion(question) {
+    const normalized = normalize(question);
+    if (base[normalized]) {
+      addMessage(base[normalized], "bot");
+    } else {
+      pendingQuestion = normalized;
+      showAddAnswerPopup();
+    }
+  }
+
+  function showAddAnswerPopup() {
+    overlay.style.display = "block";
+    addAnswerPopup.style.display = "flex";
+    newAnswerInput.value = "";
+    newAnswerInput.focus();
+  }
+
+  function hideAddAnswerPopup() {
+    overlay.style.display = "none";
+    addAnswerPopup.style.display = "none";
+  }
+
+  sendBtn.onclick = () => {
+    const question = userInput.value.trim();
+    if (!question) return;
+    addMessage(question, "user");
+    askQuestion(question);
+    userInput.value = "";
+  };
+
+  userInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      sendBtn.click();
+    }
+  });
+
+  saveAnswerBtn.onclick = () => {
+    const answer = newAnswerInput.value.trim();
+    if (!answer) {
+      alert("Merci de fournir une réponse !");
+      return;
+    }
+    base[pendingQuestion] = answer;
+    localStorage.setItem('jonas_base', JSON.stringify(base));
+    addMessage(answer, "bot");
+    pendingQuestion = null;
+    hideAddAnswerPopup();
+  };
+
+  // Accueil
+  addMessage("Bonjour ! Je suis Jonas Assistance, pose-moi une question.", "bot");
+</script>
+
+</body>
+</html>
 
 
 
