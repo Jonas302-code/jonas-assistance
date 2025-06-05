@@ -1,86 +1,137 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Jonas Assistance</title>
   <style>
     body {
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e2f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      background: #2b2b3d;
+      width: 100%;
+      max-width: 600px;
+      height: 90vh;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      margin: 0;
+      overflow: hidden;
+      color: #fff;
     }
-    #chat {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-    }
-    .message {
-      margin: 10px 0;
-    }
-    .user {
-      color: #6ab0f3;
-    }
-    .bot {
-      color: #90ee90;
-    }
-    #input-container {
-      display: flex;
-      border-top: 1px solid #333;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      font-size: 16px;
-      background-color: #2c2c2c;
-      color: white;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #6ab0f3;
-      border: none;
-      cursor: pointer;
+
+    .chat-header {
+      background: #673ab7;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      font-size: 22px;
       font-weight: bold;
-      color: black;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #1e1e2f;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 12px 18px;
+      margin-bottom: 10px;
+      border-radius: 20px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .message.user {
+      background: #7e57c2;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.ia {
+      background: #3949ab;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #444;
+      background: #2b2b3d;
+    }
+
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      background: #1e1e2f;
+      color: #fff;
+      outline: none;
+    }
+
+    .chat-input button {
+      background: #5e35b1;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .chat-input button:hover {
+      background: #4527a0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-
-  <div id="chat"></div>
-
-  <div id="input-container">
-    <input type="text" id="userInput" placeholder="Pose ta question..." autocomplete="off">
-    <button onclick="sendMessage()">Envoyer</button>
+  <div class="chat-container">
+    <div class="chat-header">Jonas Assistance</div>
+    <div id="chat" class="chat-messages"></div>
+    <div class="chat-input">
+      <input id="question" type="text" placeholder="Pose ta question ici..." onkeypress="if(event.key === 'Enter') repondre();">
+      <button onclick="repondre()">Envoyer</button>
+    </div>
   </div>
 
   <script>
-    const base = {
+    const base = JSON.parse(localStorage.getItem('jonas_base')) || {
       "bonjour": "Bonjour ! Comment puis-je t’aider ?",
       "salut": "Salut !",
-      "comment vas-tu": "Je vais bien, merci.",
       "qui es-tu": "Je suis Jonas Assistance, ton assistant intelligent.",
       "qui est ton créateur": "Mon créateur est Jonas Sleiman.",
       "qui est jonas sleiman": "Jonas Sleiman est le créateur de cette intelligence artificielle.",
       "quelle est la capitale de la france": "La capitale de la France est Paris.",
-      "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
-      "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
-      "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
       "combien font 5 + 5": "5 + 5 = 10.",
       "quelle est la couleur du ciel": "Le ciel est généralement bleu quand il fait beau.",
+      "comment vas-tu": "Je vais bien, merci.",
+      "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
       "quel est l’océan le plus grand": "L’océan Pacifique est le plus vaste du monde.",
       "combien de continents existe-t-il": "Il y a 7 continents.",
-      "combien de continents y a-t-il": "Il y a 7 continents sur Terre.",
       "quelle est la langue la plus parlée": "Le chinois mandarin est la langue la plus parlée au monde.",
-      "quelle est la langue la plus parlée dans le monde": "Le chinois mandarin est la langue la plus parlée dans le monde.",
       "qui est zinedine zidane": "Zidane est un ancien joueur de football français et un entraîneur célèbre.",
+      "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
       "que signifie html": "HTML signifie HyperText Markup Language.",
-      "qu’est-ce que javascript": "JavaScript est un langage de programmation utilisé sur les sites web.",
-      "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour la mise en page des sites web.",
       "quelle est la vitesse de la lumière": "Environ 299 792 km/s.",
       "qui a inventé internet": "Tim Berners-Lee est l’un des pionniers d’Internet.",
       "quel est le plus grand animal": "La baleine bleue est le plus grand animal vivant.",
@@ -89,63 +140,66 @@
       "quelle est la planète la plus proche du soleil": "C’est Mercure.",
       "quelle est la planète la plus loin": "C’est Neptune.",
       "qu’est-ce que l’ia": "L’intelligence artificielle désigne les machines capables de simuler l’intelligence humaine.",
-      "qu’est-ce que l'intelligence artificielle": "L’intelligence artificielle désigne les machines capables de simuler l’intelligence humaine.",
       "quel est le plus grand pays": "La Russie est le plus grand pays en superficie.",
+      "qu’est-ce que javascript": "JavaScript est un langage de programmation utilisé sur les sites web.",
+      "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour la mise en page des sites web.",
       "comment on dit bonjour en espagnol": "On dit 'Hola'.",
       "quel est le plus haut sommet du monde": "L’Everest est le plus haut sommet du monde.",
       "qui est albert einstein": "Albert Einstein est un physicien célèbre pour la théorie de la relativité.",
       "qui est marie curie": "Marie Curie est une scientifique connue pour ses recherches sur la radioactivité.",
       "qui est napoléon": "Napoléon Bonaparte était un chef militaire et empereur français.",
-      "qui est napoléon bonaparte": "Napoléon Bonaparte était un chef militaire et empereur français.",
       "quel âge a la terre": "La Terre a environ 4,5 milliards d’années.",
       "combien de dents a un adulte": "Un adulte a généralement 32 dents.",
       "qui a peint la joconde": "La Joconde a été peinte par Léonard de Vinci.",
       "comment fonctionne un volcan": "Un volcan fonctionne par l'accumulation de magma qui, sous pression, est expulsé à la surface.",
-      "qui a inventé l’électricité": "Des scientifiques comme Franklin, Faraday et Tesla ont contribué à l’usage de l’électricité.",
+      "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
+      "qui a inventé l’électricité": "L'électricité n'a pas été 'inventée', mais des scientifiques comme Benjamin Franklin et Nikola Tesla ont contribué à sa compréhension et son utilisation.",
       "qu’est-ce qu’un atome": "Un atome est la plus petite unité constitutive de la matière.",
       "combien mesure la tour eiffel": "La tour Eiffel mesure environ 330 mètres de hauteur.",
-      "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres projets technologiques.",
-      "qu’est-ce qu’une éclipse": "Une éclipse est un phénomène où un astre en cache un autre.",
+      "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres entreprises technologiques.",
+      "qu’est-ce qu’une éclipse": "Une éclipse est un phénomène où un astre en cache un autre, comme lors d'une éclipse solaire ou lunaire.",
       "qu’est-ce que le big bang": "Le Big Bang est la théorie expliquant l'origine de l'univers à partir d'une expansion rapide il y a environ 13,8 milliards d'années.",
-      "quelle est la formule de l'eau": "La formule chimique de l'eau est H₂O.",
-      "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en 1492."
+      // Ajoutez ici d'autres questions et réponses pour atteindre 500 ou plus
     };
 
-    // Stocker la base dans le localStorage
-    localStorage.setItem('jonas_base', JSON.stringify(base));
+    function enregistrer() {
+      localStorage.setItem('jonas_base', JSON.stringify(base));
+    }
 
-    function sendMessage() {
-      const input = document.getElementById("userInput");
+    function ajouterMessage(texte, auteur) {
+      const div = document.createElement("div");
+      div.className = "message " + auteur;
+      div.innerText = texte;
+      document.getElementById("chat").appendChild(div);
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+    }
+
+    function repondre() {
+      const input = document.getElementById("question");
       const question = input.value.trim().toLowerCase();
       if (!question) return;
 
-      const chat = document.getElementById("chat");
-      const userMsg = document.createElement("div");
-      userMsg.className = "message user";
-      userMsg.textContent = "Toi: " + question;
-      chat.appendChild(userMsg);
+      ajouterMessage(question, "user");
 
-      const base = JSON.parse(localStorage.getItem('jonas_base')) || {};
-      const reponse = base[question] || "Désolé, je ne connais pas encore la réponse à cette question.";
-
-      const botMsg = document.createElement("div");
-      botMsg.className = "message bot";
-      botMsg.textContent = "Jonas: " + reponse;
-      chat.appendChild(botMsg);
+      if (base[question]) {
+        ajouterMessage(base[question], "ia");
+      } else {
+        const ajout = prompt("Je ne connais pas encore cette réponse. Veux-tu l’ajouter ?");
+        if (ajout) {
+          base[question] = ajout;
+          enregistrer();
+          ajouterMessage("Merci, je m'en souviendrai.", "ia");
+        } else {
+          ajouterMessage("D’accord, une autre fois peut-être.", "ia");
+        }
+      }
 
       input.value = "";
-      chat.scrollTop = chat.scrollHeight;
     }
-
-    // Envoyer avec Entrée
-    document.getElementById("userInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
-    });
   </script>
 </body>
 </html>
+
 
 
 
