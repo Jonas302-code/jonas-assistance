@@ -1,137 +1,86 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Jonas Assistance</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #1e1e2f;
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
       height: 100vh;
+      margin: 0;
     }
-
-    .chat-container {
-      background: #2b2b3d;
-      width: 100%;
-      max-width: 600px;
-      height: 90vh;
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      color: #fff;
-    }
-
-    .chat-header {
-      background: #673ab7;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .chat-messages {
+    #chat {
       flex: 1;
-      padding: 20px;
+      padding: 10px;
       overflow-y: auto;
-      background: #1e1e2f;
-      display: flex;
-      flex-direction: column;
     }
-
     .message {
-      max-width: 75%;
-      padding: 12px 18px;
-      margin-bottom: 10px;
-      border-radius: 20px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      animation: fadeIn 0.3s ease-in-out;
+      margin: 10px 0;
     }
-
-    .message.user {
-      background: #7e57c2;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
+    .user {
+      color: #6ab0f3;
     }
-
-    .message.ia {
-      background: #3949ab;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
+    .bot {
+      color: #90ee90;
     }
-
-    .chat-input {
+    #input-container {
       display: flex;
-      border-top: 1px solid #444;
-      background: #2b2b3d;
+      border-top: 1px solid #333;
     }
-
-    .chat-input input {
+    input {
       flex: 1;
+      padding: 10px;
       border: none;
-      padding: 15px;
       font-size: 16px;
-      background: #1e1e2f;
-      color: #fff;
-      outline: none;
-    }
-
-    .chat-input button {
-      background: #5e35b1;
+      background-color: #2c2c2c;
       color: white;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #6ab0f3;
       border: none;
-      padding: 0 20px;
-      font-size: 16px;
       cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .chat-input button:hover {
-      background: #4527a0;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      font-weight: bold;
+      color: black;
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">Jonas Assistance</div>
-    <div id="chat" class="chat-messages"></div>
-    <div class="chat-input">
-      <input id="question" type="text" placeholder="Pose ta question ici..." onkeypress="if(event.key === 'Enter') repondre();">
-      <button onclick="repondre()">Envoyer</button>
-    </div>
+
+  <div id="chat"></div>
+
+  <div id="input-container">
+    <input type="text" id="userInput" placeholder="Pose ta question..." autocomplete="off">
+    <button onclick="sendMessage()">Envoyer</button>
   </div>
 
   <script>
-    const base = JSON.parse(localStorage.getItem('jonas_base')) || {
+    const base = {
       "bonjour": "Bonjour ! Comment puis-je t’aider ?",
       "salut": "Salut !",
+      "comment vas-tu": "Je vais bien, merci.",
       "qui es-tu": "Je suis Jonas Assistance, ton assistant intelligent.",
       "qui est ton créateur": "Mon créateur est Jonas Sleiman.",
       "qui est jonas sleiman": "Jonas Sleiman est le créateur de cette intelligence artificielle.",
       "quelle est la capitale de la france": "La capitale de la France est Paris.",
+      "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
+      "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
+      "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
       "combien font 5 + 5": "5 + 5 = 10.",
       "quelle est la couleur du ciel": "Le ciel est généralement bleu quand il fait beau.",
-      "comment vas-tu": "Je vais bien, merci.",
-      "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
       "quel est l’océan le plus grand": "L’océan Pacifique est le plus vaste du monde.",
       "combien de continents existe-t-il": "Il y a 7 continents.",
+      "combien de continents y a-t-il": "Il y a 7 continents sur Terre.",
       "quelle est la langue la plus parlée": "Le chinois mandarin est la langue la plus parlée au monde.",
+      "quelle est la langue la plus parlée dans le monde": "Le chinois mandarin est la langue la plus parlée dans le monde.",
       "qui est zinedine zidane": "Zidane est un ancien joueur de football français et un entraîneur célèbre.",
-      "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
       "que signifie html": "HTML signifie HyperText Markup Language.",
+      "qu’est-ce que javascript": "JavaScript est un langage de programmation utilisé sur les sites web.",
+      "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour la mise en page des sites web.",
       "quelle est la vitesse de la lumière": "Environ 299 792 km/s.",
       "qui a inventé internet": "Tim Berners-Lee est l’un des pionniers d’Internet.",
       "quel est le plus grand animal": "La baleine bleue est le plus grand animal vivant.",
@@ -140,340 +89,63 @@
       "quelle est la planète la plus proche du soleil": "C’est Mercure.",
       "quelle est la planète la plus loin": "C’est Neptune.",
       "qu’est-ce que l’ia": "L’intelligence artificielle désigne les machines capables de simuler l’intelligence humaine.",
+      "qu’est-ce que l'intelligence artificielle": "L’intelligence artificielle désigne les machines capables de simuler l’intelligence humaine.",
       "quel est le plus grand pays": "La Russie est le plus grand pays en superficie.",
-      "qu’est-ce que javascript": "JavaScript est un langage de programmation utilisé sur les sites web.",
-      "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour la mise en page des sites web.",
       "comment on dit bonjour en espagnol": "On dit 'Hola'.",
       "quel est le plus haut sommet du monde": "L’Everest est le plus haut sommet du monde.",
       "qui est albert einstein": "Albert Einstein est un physicien célèbre pour la théorie de la relativité.",
       "qui est marie curie": "Marie Curie est une scientifique connue pour ses recherches sur la radioactivité.",
       "qui est napoléon": "Napoléon Bonaparte était un chef militaire et empereur français.",
+      "qui est napoléon bonaparte": "Napoléon Bonaparte était un chef militaire et empereur français.",
       "quel âge a la terre": "La Terre a environ 4,5 milliards d’années.",
       "combien de dents a un adulte": "Un adulte a généralement 32 dents.",
       "qui a peint la joconde": "La Joconde a été peinte par Léonard de Vinci.",
       "comment fonctionne un volcan": "Un volcan fonctionne par l'accumulation de magma qui, sous pression, est expulsé à la surface.",
-      "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
-      "qui a inventé l’électricité": "L'électricité n'a pas été 'inventée', mais des scientifiques comme Benjamin Franklin et Nikola Tesla ont contribué à sa compréhension et son utilisation.",
+      "qui a inventé l’électricité": "Des scientifiques comme Franklin, Faraday et Tesla ont contribué à l’usage de l’électricité.",
       "qu’est-ce qu’un atome": "Un atome est la plus petite unité constitutive de la matière.",
       "combien mesure la tour eiffel": "La tour Eiffel mesure environ 330 mètres de hauteur.",
-      "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres entreprises technologiques.",
-      "qu’est-ce qu’une éclipse": "Une éclipse est un phénomène où un astre en cache un autre, comme lors d'une éclipse solaire ou lunaire.",
+      "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres projets technologiques.",
+      "qu’est-ce qu’une éclipse": "Une éclipse est un phénomène où un astre en cache un autre.",
       "qu’est-ce que le big bang": "Le Big Bang est la théorie expliquant l'origine de l'univers à partir d'une expansion rapide il y a environ 13,8 milliards d'années.",
-      {
-  "qui est jonas sleiman": "Jonas Sleiman est le créateur de cette intelligence artificielle.",
-  "qui est albert einstein": "Albert Einstein est un physicien célèbre pour la théorie de la relativité.",
-  "quelle est la capitale de la france": "La capitale de la France est Paris.",
-  "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
-  "quelle est la vitesse de la lumière": "Environ 299 792 kilomètres par seconde.",
-  "qu'est-ce que l'intelligence artificielle": "L'intelligence artificielle désigne les machines capables de simuler l'intelligence humaine.",
-  "qui a inventé internet": "Tim Berners-Lee est l'un des pionniers d'Internet.",
-  "quel est le plus grand animal": "La baleine bleue est le plus grand animal vivant.",
-  "combien de continents y a-t-il": "Il y a 7 continents sur Terre.",
-  "quelle est la langue la plus parlée dans le monde": "Le chinois mandarin est la langue la plus parlée dans le monde.",
-  "qui est napoléon bonaparte": "Napoléon Bonaparte était un chef militaire et empereur français.",
-  "quelle est la plus grande planète du système solaire": "Jupiter est la plus grande planète du système solaire.",
-  "qu'est-ce qu'un atome": "Un atome est la plus petite unité constitutive de la matière.",
-  "comment fonctionne un volcan": "Un volcan fonctionne par l'accumulation de magma qui, sous pression, est expulsé à la surface.",
-  "qui a peint la joconde": "La Joconde a été peinte par Léonard de Vinci.",
-  "quel est le plus haut sommet du monde": "L'Everest est le plus haut sommet du monde.",
-  "quel est le plus grand désert": "L'Antarctique est le plus grand désert du monde.",
-  "qui est marie curie": "Marie Curie est une scientifique connue pour ses recherches sur la radioactivité.",
-  "quel âge a la terre": "La Terre a environ 4,5 milliards d'années.",
-  "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
-  "qu'est-ce qu'une éclipse": "Une éclipse est un phénomène où un astre en cache un autre.",
-  "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres projets technologiques.",
-  "quelle est la formule de l'eau": "La formule chimique de l'eau est H2O.",
-  "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en 1492.",
-  "quelle est la planète la plus proche du soleil": "Mercure est la planète la plus proche du soleil.",
-  "que signifie html": "HTML signifie HyperText Markup Language.",
-  "qu'est-ce que javascript": "JavaScript est un langage de programmation utilisé principalement pour rendre les pages web interactives.",
-  "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour styliser les pages web.",
-  "comment on dit bonjour en espagnol": "On dit 'Hola'.",
-  "quel est le plus long fleuve du monde": "Le Nil est souvent considéré comme le plus long fleuve du monde.",
-  "qui a écrit les misérables": "Victor Hugo est l'auteur des Misérables.",
-  "qu'est-ce que la gravité": "La gravité est une force d'attraction entre les masses.",
-  "qui a inventé le téléphone": "Alexander Graham Bell est souvent crédité comme l'inventeur du téléphone.",
-  "quel est le symbole chimique de l'or": "Le symbole chimique de l'or est Au.",
-  "quelle est la capitale de l'italie": "La capitale de l'Italie est Rome.",
-  "quel est le plus grand océan": "L'océan Pacifique est le plus grand océan.",
-  "quelle est la distance entre la terre et la lune": "Environ 384 400 kilomètres.",
-  "qui est leonard de vinci": "Léonard de Vinci était un peintre, inventeur et scientifique de la Renaissance.",
-  "qu'est-ce que le big bang": "Le Big Bang est la théorie expliquant l'origine de l'univers par une expansion rapide il y a environ 13,8 milliards d'années.",
-  "quelle est la monnaie de la france": "La monnaie est l'euro (€).",
-  "quelle est la capitale de l'espagne": "La capitale de l'Espagne est Madrid.",
-  "qu'est-ce que la photosynthèse": "La photosynthèse est le processus par lequel les plantes transforment la lumière en énergie.",
-  "qui est galilée": "Galilée était un astronome et physicien italien, pionnier de la science moderne.",
-  "qu'est-ce que la révolution française": "C'est une période de bouleversements politiques et sociaux en France à la fin du 18ème siècle.",
-  "qui a écrit roméo et juliette": "William Shakespeare est l'auteur de Roméo et Juliette.",
-  "quelle est la capitale de l'allemagne": "La capitale de l'Allemagne est Berlin.",
-  "quel est le pays le plus peuplé du monde": "La Chine est le pays le plus peuplé.",
-  "quel est le métal le plus léger": "Le lithium est le métal le plus léger.",
-  "qu'est-ce que l'énergie renouvelable": "Ce sont des sources d'énergie qui se régénèrent naturellement, comme le soleil ou le vent.",
-  "qui a inventé l'imprimerie": "Johannes Gutenberg a inventé l'imprimerie au 15ème siècle.",
-  "quelle est la capitale de la russie": "La capitale de la Russie est Moscou.",
-  "qu'est-ce que la démocratie": "C'est un système politique où le pouvoir appartient au peuple.",
-  "quel est le plus grand lac du monde": "Le lac Supérieur est le plus grand lac d'eau douce par surface.",
-  "qui est steve jobs": "Steve Jobs était un entrepreneur et cofondateur d'Apple.",
-  "quelle est la capitale de l'australie": "La capitale de l'Australie est Canberra.",
-  "qu'est-ce que l'ADN": "L'ADN est la molécule qui contient le code génétique des êtres vivants.",
-  "qui a peint guernica": "Pablo Picasso a peint Guernica.",
-  "quelle est la langue officielle du brésil": "La langue officielle du Brésil est le portugais.",
-  "quel est le plus grand canyon du monde": "Le Grand Canyon aux États-Unis est le plus grand canyon.",
-  "qui a écrit le petit prince": "Antoine de Saint-Exupéry est l'auteur du Petit Prince.",
-  "qu'est-ce que le système solaire": "C'est un ensemble formé par le Soleil et les objets qui gravitent autour, comme les planètes.",
-  "quelle est la capitale de l'egypte": "La capitale de l'Égypte est Le Caire.",
-  "quel est le sport le plus pratiqué dans le monde": "Le football (soccer) est le sport le plus pratiqué.",
-  "qui a découvert la pénicilline": "Alexander Fleming a découvert la pénicilline.",
-  "quel est le plus petit pays du monde": "Le Vatican est le plus petit pays.",
-  "qu'est-ce que la relativité": "La théorie de la relativité a été formulée par Albert Einstein et explique la gravité et le temps.",
-  "qui est victor hugo": "Victor Hugo est un écrivain français célèbre pour Les Misérables et Notre-Dame de Paris.",
-  "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
-  "quelle est la température du soleil": "La température à la surface du soleil est d'environ 5 500 degrés Celsius.",
-  "qu'est-ce que la biodiversité": "La biodiversité est la variété des formes de vie sur Terre.",
-  "qui est michelangelo": "Michel-Ange était un sculpteur, peintre et architecte de la Renaissance.",
-  "quel est le plus long fleuve d'Afrique": "Le Nil est le plus long fleuve d'Afrique.",
-  "quelle est la capitale de la chine": "La capitale de la Chine est Pékin.",
-  "qu'est-ce que le réchauffement climatique": "C'est l'augmentation progressive de la température moyenne de la Terre.",
-  "qui a écrit les fables de la fontaine": "Jean de La Fontaine est l'auteur des Fables.",
-  "quel est le plus grand pays du monde": "La Russie est le plus grand pays en superficie.",
-  "quelle est la capitale de la belgique": "La capitale de la Belgique est Bruxelles.",
-  "qu'est-ce que l'électricité": "L'électricité est un flux de charges électriques utilisée pour alimenter les appareils.",
-  "qui a inventé l'ampoule électrique": "Thomas Edison est souvent crédité de l'invention de l'ampoule électrique.",
-  "quelle est la capitale de l'inde": "La capitale de l'Inde est New Delhi."
-  {
-  "quelle est la capitale de l'allemagne": "La capitale de l'Allemagne est Berlin.",
-  "qui a écrit les misérables": "Les Misérables a été écrit par Victor Hugo.",
-  "qu'est-ce que la photosynthèse": "La photosynthèse est le processus par lequel les plantes transforment la lumière en énergie.",
-  "qui a découvert l'amérique": "Christophe Colomb a découvert l'Amérique en 1492.",
-  "qu'est-ce que la gravité": "La gravité est la force d'attraction entre les masses.",
-  "qui était Napoléon Bonaparte": "Napoléon Bonaparte était un empereur français et un général militaire.",
-  "quelle est la langue officielle du brésil": "La langue officielle du Brésil est le portugais.",
-  "qu'est-ce que l'énergie renouvelable": "L'énergie renouvelable provient de sources naturelles qui se régénèrent comme le soleil ou le vent.",
-  "qui a peint la chapelle sixtine": "La chapelle Sixtine a été peinte par Michel-Ange.",
-  "quel est le plus grand océan": "Le plus grand océan est l'océan Pacifique.",
-  "quelle est la formule de l'eau": "La formule chimique de l'eau est H2O.",
-  "qui est le père de la psychanalyse": "Sigmund Freud est considéré comme le père de la psychanalyse.",
-  "qu'est-ce que l'effet de serre": "L'effet de serre est le phénomène par lequel l'atmosphère retient la chaleur du soleil.",
-  "quelle est la monnaie de la suisse": "La monnaie de la Suisse est le franc suisse.",
-  "qui a inventé le téléphone": "Alexander Graham Bell est crédité pour l'invention du téléphone.",
-  "quel est l'organe principal de la respiration": "Le poumon est l'organe principal de la respiration.",
-  "qu'est-ce qu'un atome": "Un atome est la plus petite unité constitutive de la matière.",
-  "qui a écrit Roméo et Juliette": "Roméo et Juliette a été écrit par William Shakespeare.",
-  "quelle est la distance entre la terre et la lune": "La distance moyenne entre la Terre et la Lune est d'environ 384 400 km.",
-  "qu'est-ce que l'intelligence artificielle": "L'intelligence artificielle est la simulation de l'intelligence humaine par des machines.",
-  "quel est le plus haut sommet du monde": "Le mont Everest est le plus haut sommet du monde.",
-  "qui est Marie Curie": "Marie Curie était une scientifique célèbre pour ses recherches sur la radioactivité.",
-  "quelle est la capitale de l'espagne": "La capitale de l'Espagne est Madrid.",
-  "qu'est-ce que le système solaire": "Le système solaire est composé du Soleil et des corps qui gravitent autour, comme les planètes.",
-  "qui est Albert Einstein": "Albert Einstein était un physicien connu pour la théorie de la relativité.",
-  "quelle est la vitesse de la lumière": "La vitesse de la lumière est d'environ 299 792 kilomètres par seconde.",
-  "qu'est-ce que le Big Bang": "Le Big Bang est la théorie de l'origine de l'univers par une expansion rapide.",
-  "quelle est la capitale de la russie": "La capitale de la Russie est Moscou.",
-  "qui a écrit la Bible": "La Bible est une collection de textes écrits par plusieurs auteurs sur plusieurs siècles.",
-  "qu'est-ce que la démocratie": "La démocratie est un système politique où le pouvoir appartient au peuple.",
-  "quel est le plus grand désert chaud": "Le désert du Sahara est le plus grand désert chaud.",
-  "qui a peint la Joconde": "La Joconde a été peinte par Léonard de Vinci.",
-  "quelle est la capitale de l'italie": "La capitale de l'Italie est Rome.",
-  "qu'est-ce que l'ADN": "L'ADN est la molécule qui contient l'information génétique des êtres vivants.",
-  "qui a inventé l'ampoule électrique": "Thomas Edison est souvent crédité pour l'invention de l'ampoule électrique.",
-  "quelle est la planète rouge": "La planète rouge est Mars.",
-  "qu'est-ce que la tectonique des plaques": "La tectonique des plaques est le mouvement des plaques rigides qui forment la surface terrestre.",
-  "qui est Victor Hugo": "Victor Hugo était un écrivain français célèbre du 19ème siècle.",
-  "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
-  "qu'est-ce que la révolution industrielle": "La révolution industrielle est une période de grands changements technologiques et sociaux au 18ème et 19ème siècle.",
-  "qui a découvert la pénicilline": "Alexander Fleming a découvert la pénicilline.",
-  "quelle est la capitale de la chine": "La capitale de la Chine est Pékin (Beijing).",
-  "qu'est-ce que le climat": "Le climat est l'ensemble des conditions météorologiques d'une région sur une longue période.",
-  "qui était Gandhi": "Mohandas Karamchand Gandhi était un leader politique et spirituel indien.",
-  "quelle est la formule du dioxyde de carbone": "La formule du dioxyde de carbone est CO2.",
-  "qu'est-ce que la biodiversité": "La biodiversité désigne la variété des êtres vivants sur Terre.",
-  "qui est Léonard de Vinci": "Léonard de Vinci était un artiste, inventeur et scientifique de la Renaissance.",
-  "quelle est la capitale de l'egypte": "La capitale de l'Égypte est Le Caire.",
-  "qu'est-ce qu'un volcan": "Un volcan est une ouverture à la surface de la Terre d'où s'échappent des roches en fusion.",
-  "qui a écrit Candide": "Candide a été écrit par Voltaire.",
-  "quelle est la monnaie des États-Unis": "La monnaie des États-Unis est le dollar américain.",
-  "qu'est-ce que la radioactivité": "La radioactivité est l'émission spontanée de particules ou rayonnements par certains noyaux atomiques.",
-  "qui est Simone de Beauvoir": "Simone de Beauvoir était une philosophe et écrivaine française.",
-  "quelle est la capitale de la grece": "La capitale de la Grèce est Athènes.",
-  "qu'est-ce que la relativité": "La relativité est une théorie physique formulée par Albert Einstein.",
-  "qui était Cléopâtre": "Cléopâtre était la dernière reine d'Égypte antique.",
-  "quelle est la capitale du portugal": "La capitale du Portugal est Lisbonne.",
-  "qu'est-ce que la couche d'ozone": "La couche d'ozone protège la Terre des rayons ultraviolets du soleil.",
-  "qui a découvert l'électricité": "Benjamin Franklin est l'un des pionniers de l'électricité.",
-  "quelle est la capitale de la suède": "La capitale de la Suède est Stockholm.",
-  "qu'est-ce qu'un trou noir": "Un trou noir est un objet astronomique avec une gravité si forte que même la lumière ne peut s'en échapper.",
-  "qui est Charles Darwin": "Charles Darwin est connu pour sa théorie de l'évolution par sélection naturelle.",
-  "quelle est la capitale de l'australie": "La capitale de l'Australie est Canberra.",
-  "qu'est-ce que la monnaie": "La monnaie est un moyen d'échange accepté par une communauté.",
-  "qui est Napoléon": "Napoléon Bonaparte était un chef militaire et empereur français.",
-  "quelle est la capitale de la turquie": "La capitale de la Turquie est Ankara.",
-  "qu'est-ce que l'économie": "L'économie est la science qui étudie la production, la distribution et la consommation des biens et services.",
-  "qui a inventé l'ordinateur": "Charles Babbage est considéré comme l'inventeur de l'ordinateur.",
-  "quelle est la capitale de la belgique": "La capitale de la Belgique est Bruxelles.",
-  "qu'est-ce que l'architecture": "L'architecture est l'art de concevoir et construire des bâtiments.",
-  "qui a écrit l'odysée": "L'Odyssée est un poème épique attribué à Homère.",
-  "quelle est la capitale de l'inde": "La capitale de l'Inde est New Delhi.",
-  "qu'est-ce que la démocratie": "La démocratie est un système politique dans lequel les citoyens ont le pouvoir.",
-  "qui est Jeanne d'Arc": "Jeanne d'Arc était une héroïne française de la guerre de Cent Ans.",
-  "quelle est la capitale de la norvège": "La capitale de la Norvège est Oslo.",
-  "qu'est-ce que la physique": "La physique est la science qui étudie la matière et l'énergie.",
-  "qui est Mozart": "Wolfgang Amadeus Mozart était un compositeur autrichien célèbre.",
-  "quelle est la capitale du mexique": "La capitale du Mexique est Mexico.",
-  "qu'est-ce que la chimie": "La chimie est la science qui étudie la composition, la structure et les propriétés de la matière.",
-  "qui a découvert l'Amérique": "Christophe Colomb a découvert l'Amérique en 1492.",
-  "quelle est la capitale de l'argentine": "La capitale de l'Argentine est Buenos Aires.",
-  "qu'est-ce que la géographie": "La géographie est l'étude des territoires, des paysages et des populations.",
-  "qui est Albert Camus": "Albert Camus était un écrivain et philosophe français.",
-  "quelle est la capitale de la pologne": "La capitale de la Pologne est Varsovie.",
-  "qu'est-ce que l'histoire": "L'histoire est l'étude des événements passés.",
-  "qui a écrit le petit prince": "Le Petit Prince a été écrit par Antoine de Saint
-  {
-  "quelle est la capitale de la france": "La capitale de la France est Paris.",
-  "qui est Louis XIV": "Louis XIV était un roi de France surnommé le Roi Soleil.",
-  "qu'est-ce que la révolution française": "La Révolution française est un événement majeur de 1789 qui a renversé la monarchie absolue.",
-  "qui a écrit les fleurs du mal": "Les Fleurs du mal a été écrit par Charles Baudelaire.",
-  "quelle est la capitale de la belgique": "La capitale de la Belgique est Bruxelles.",
-  "qu'est-ce que la théorie de l'évolution": "La théorie de l'évolution explique comment les espèces changent au fil du temps grâce à la sélection naturelle.",
-  "qui a inventé l'ampoule électrique": "Thomas Edison est souvent crédité pour l'invention de l'ampoule électrique.",
-  "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
-  "qu'est-ce que le réchauffement climatique": "Le réchauffement climatique est l'augmentation progressive de la température moyenne de la Terre.",
-  "qui a écrit le seigneur des anneaux": "Le Seigneur des Anneaux a été écrit par J.R.R. Tolkien.",
-  "quelle est la capitale de la norvège": "La capitale de la Norvège est Oslo.",
-  "qu'est-ce que le système immunitaire": "Le système immunitaire protège le corps contre les infections.",
-  "qui était Marie Curie": "Marie Curie était une scientifique célèbre pour ses travaux sur la radioactivité.",
-  "quelle est la capitale de la turquie": "La capitale de la Turquie est Ankara.",
-  "qu'est-ce que la vitesse de la lumière": "La vitesse de la lumière est d'environ 300 000 kilomètres par seconde.",
-  "qui est Charles de Gaulle": "Charles de Gaulle était un général et homme d'État français.",
-  "quelle est la capitale de l'australie": "La capitale de l'Australie est Canberra.",
-  "qu'est-ce que l'énergie nucléaire": "L'énergie nucléaire est l'énergie libérée par la fission ou la fusion des noyaux atomiques.",
-  "qui a peint la nuit étoilée": "La Nuit étoilée a été peinte par Vincent Van Gogh.",
-  "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
-  "qu'est-ce que le changement climatique": "Le changement climatique désigne les modifications à long terme du climat terrestre.",
-  "qui est Nelson Mandela": "Nelson Mandela était un leader sud-africain contre l'apartheid.",
-  "quelle est la capitale de l'inde": "La capitale de l'Inde est New Delhi.",
-  "qu'est-ce que la relativité restreinte": "La relativité restreinte est une théorie physique développée par Albert Einstein.",
-  "qui a écrit le rouge et le noir": "Le Rouge et le Noir a été écrit par Stendhal.",
-  "quelle est la capitale du portugal": "La capitale du Portugal est Lisbonne.",
-  "qu'est-ce que le système solaire": "Le système solaire est composé du Soleil et des planètes qui l'entourent.",
-  "qui a découvert la pénicilline": "Alexander Fleming a découvert la pénicilline.",
-  "quelle est la capitale de la chine": "La capitale de la Chine est Pékin.",
-  "qu'est-ce que la démocratie": "La démocratie est un système politique où le peuple exerce le pouvoir.",
-  "qui était Jeanne d'Arc": "Jeanne d'Arc était une héroïne française durant la guerre de Cent Ans.",
-  "quelle est la capitale de la russie": "La capitale de la Russie est Moscou.",
-  "qu'est-ce que la photosynthèse": "La photosynthèse est le processus par lequel les plantes produisent de l'énergie grâce à la lumière.",
-  "qui a écrit la divine comédie": "La Divine Comédie a été écrite par Dante Alighieri.",
-  "quelle est la capitale de l'egypte": "La capitale de l'Égypte est Le Caire.",
-  "qu'est-ce que la tectonique des plaques": "La tectonique des plaques explique le mouvement des grandes plaques qui composent la croûte terrestre.",
-  "qui a inventé le téléphone": "Alexander Graham Bell est crédité pour l'invention du téléphone.",
-  "quelle est la capitale du mexique": "La capitale du Mexique est Mexico.",
-  "qu'est-ce que l'énergie solaire": "L'énergie solaire est l'énergie provenant du rayonnement du soleil.",
-  "qui est Léonard de Vinci": "Léonard de Vinci était un peintre, inventeur et scientifique de la Renaissance.",
-  "quelle est la capitale de la grece": "La capitale de la Grèce est Athènes.",
-  "qu'est-ce que la biodiversité": "La biodiversité est la diversité des espèces vivantes sur Terre.",
-  "qui était Albert Einstein": "Albert Einstein était un physicien célèbre pour la théorie de la relativité.",
-  "quelle est la capitale de la nouvelle-zélande": "La capitale de la Nouvelle-Zélande est Wellington.",
-  "qu'est-ce que l'ADN": "L'ADN est la molécule porteuse de l'information génétique.",
-  "qui a écrit les trois mousquetaires": "Les Trois Mousquetaires ont été écrits par Alexandre Dumas.",
-  "quelle est la capitale de l'afrique du sud": "L'Afrique du Sud a trois capitales : Pretoria, Le Cap et Bloemfontein.",
-  "qu'est-ce que le Big Bang": "Le Big Bang est la théorie expliquant l'origine de l'univers.",
-  "qui a inventé l'ampoule électrique": "Thomas Edison est souvent crédité pour l'invention de l'ampoule électrique.",
-  "quelle est la capitale de la corée du sud": "La capitale de la Corée du Sud est Séoul.",
-  "qu'est-ce que la révolution industrielle": "La révolution industrielle est une période de transformations économiques et sociales du 18ème au 19ème siècle.",
-  "qui est William Shakespeare": "William Shakespeare était un dramaturge et poète anglais.",
-  "quelle est la capitale de l'iran": "La capitale de l'Iran est Téhéran.",
-  "qu'est-ce que la gravité": "La gravité est une force qui attire les objets vers le centre de la Terre.",
-  "qui a écrit madame bovary": "Madame Bovary a été écrit par Gustave Flaubert.",
-  "quelle est la capitale de l'irlande": "La capitale de l'Irlande est Dublin.",
-  "qu'est-ce que l'électricité": "L'électricité est une forme d'énergie liée au mouvement des électrons.",
-  "qui a peint guernica": "Guernica a été peint par Pablo Picasso."
-  {
-  "qu'est-ce qu'un algorithme": "Un algorithme est une suite d'instructions permettant de résoudre un problème ou d'effectuer une tâche.",
-  "quelle est la loi de la gravitation universelle": "La loi de la gravitation universelle d'Isaac Newton décrit la force d'attraction entre deux masses proportionnelle à leurs masses et inversement proportionnelle au carré de la distance qui les sépare.",
-  "qu'est-ce qu'un atome": "Un atome est la plus petite unité constitutive de la matière, composée d'un noyau (protons et neutrons) entouré d'électrons.",
-  "qu'est-ce que la programmation orientée objet": "La programmation orientée objet est un paradigme de programmation basé sur le concept d'objets, qui regroupent données et fonctions.",
-  "quelle est la formule de l'énergie cinétique": "L'énergie cinétique est donnée par la formule E = 1/2 × m × v², où m est la masse et v la vitesse.",
-  "qu'est-ce qu'un réseau informatique": "Un réseau informatique est un ensemble d'ordinateurs connectés entre eux pour échanger des données.",
-  "quelle est la différence entre un virus et un logiciel malveillant": "Un virus est un type de logiciel malveillant qui se propage en s'auto-reproduisant, tandis que le terme logiciel malveillant inclut tous les programmes nuisibles.",
-  "qu'est-ce que la loi d'ohm": "La loi d'Ohm relie la tension, le courant et la résistance dans un circuit électrique par la formule V = R × I.",
-  "qu'est-ce que le cloud computing": "Le cloud computing désigne l'accès à des ressources informatiques (stockage, calcul) via internet.",
-  "qu'est-ce qu'une fonction en mathématiques": "Une fonction est une relation qui associe à chaque élément d'un ensemble un élément unique d'un autre ensemble.",
-  "qu'est-ce qu'un virus informatique": "Un virus informatique est un programme malveillant conçu pour infecter et perturber un ordinateur.",
-  "qu'est-ce que la cryptographie": "La cryptographie est l'étude des techniques de chiffrement pour sécuriser les communications.",
-  "quelle est la différence entre le HTML et le CSS": "Le HTML structure le contenu d'une page web, tandis que le CSS en définit le style et la présentation.",
-  "qu'est-ce qu'un circuit électrique": "Un circuit électrique est un chemin fermé dans lequel circule un courant électrique.",
-  "qu'est-ce que la loi de conservation de l'énergie": "Cette loi affirme que l'énergie ne peut ni être créée ni détruite, seulement transformée.",
-  "qu'est-ce que l'intelligence artificielle": "L'intelligence artificielle est un domaine de l'informatique qui cherche à créer des systèmes capables d'apprendre et de prendre des décisions.",
-  "qu'est-ce qu'un système d'exploitation": "Un système d'exploitation est un logiciel qui gère les ressources matérielles et permet l'exécution des programmes sur un ordinateur.",
-  "quelle est la formule du périmètre d'un cercle": "Le périmètre d'un cercle est donné par la formule P = 2 × π × r, où r est le rayon.",
-  "qu'est-ce qu'un langage de programmation": "Un langage de programmation est un outil utilisé pour écrire des instructions compréhensibles par un ordinateur.",
-  "qu'est-ce que la vitesse de la lumière": "La vitesse de la lumière dans le vide est d'environ 299 792 kilomètres par seconde.",
-  "qu'est-ce que la mécanique quantique": "La mécanique quantique est une branche de la physique qui étudie le comportement des particules à très petite échelle.",
-  "qu'est-ce que le machine learning": "Le machine learning est une technique d'intelligence artificielle permettant à un système d'apprendre à partir de données.",
-  "qu'est-ce que le Big Data": "Le Big Data désigne des ensembles de données très volumineux et complexes à analyser avec les outils classiques.",
-  "qu'est-ce qu'une base de données": "Une base de données est un ensemble organisé de données stockées et accessibles informatiquement.",
-  "qu'est-ce que l'effet de serre": "L'effet de serre est le phénomène par lequel certains gaz retiennent la chaleur dans l'atmosphère terrestre.",
-  "qu'est-ce que l'API": "Une API (Application Programming Interface) permet à différents logiciels de communiquer entre eux.",
-  "qu'est-ce que la loi de Boyle-Mariotte": "Cette loi décrit la relation entre la pression et le volume d'un gaz à température constante.",
-  "qu'est-ce qu'un système binaire": "Le système binaire est un système de numération utilisant seulement deux chiffres : 0 et 1.",
-  "qu'est-ce que la nanotechnologie": "La nanotechnologie concerne la manipulation de la matière à l'échelle atomique ou moléculaire.",
-  "qu'est-ce que le protocole HTTP": "HTTP est un protocole de communication utilisé pour transférer des pages web sur internet.",
-  "qu'est-ce qu'une cellule": "Une cellule est l'unité de base de tout organisme vivant.",
-  "qu'est-ce que la théorie des cordes": "La théorie des cordes est une hypothèse en physique qui tente d'unifier toutes les forces fondamentales.",
-  "qu'est-ce que le HTML": "HTML (HyperText Markup Language) est un langage utilisé pour structurer les pages web.",
-  "qu'est-ce qu'un moteur à combustion": "Un moteur à combustion transforme l'énergie chimique du carburant en énergie mécanique.",
-  "qu'est-ce qu'une API REST": "Une API REST est un type d'API qui utilise les méthodes HTTP pour accéder aux ressources.",
-  "qu'est-ce que le protocole TCP/IP": "TCP/IP est un ensemble de protocoles utilisé pour la communication sur internet.",
-  "qu'est-ce que la radioactivité": "La radioactivité est la désintégration spontanée de noyaux instables, émettant des radiations.",
-  "qu'est-ce que la loi de Faraday": "Cette loi décrit comment un champ magnétique variable peut induire un courant électrique.",
-  "qu'est-ce que le deep learning": "Le deep learning est une sous-catégorie du machine learning utilisant des réseaux de neurones profonds.",
-  "qu'est-ce que la RAM": "La RAM est une mémoire vive qui permet de stocker temporairement les données utilisées par l'ordinateur.",
-  "qu'est-ce que la résolution d'écran": "La résolution d'écran correspond au nombre de pixels affichés sur un écran.",
-  "qu'est-ce qu'un satellite artificiel": "Un satellite artificiel est un objet lancé par l'homme qui orbite autour de la Terre ou d'un autre corps céleste."
-}
-
-}
-
-
-}
-
+      "quelle est la formule de l'eau": "La formule chimique de l'eau est H₂O.",
+      "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en 1492."
     };
 
-    function enregistrer() {
-      localStorage.setItem('jonas_base', JSON.stringify(base));
-    }
+    // Stocker la base dans le localStorage
+    localStorage.setItem('jonas_base', JSON.stringify(base));
 
-    function ajouterMessage(texte, auteur) {
-      const div = document.createElement("div");
-      div.className = "message " + auteur;
-      div.innerText = texte;
-      document.getElementById("chat").appendChild(div);
-      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
-    }
-
-    function repondre() {
-      const input = document.getElementById("question");
+    function sendMessage() {
+      const input = document.getElementById("userInput");
       const question = input.value.trim().toLowerCase();
       if (!question) return;
 
-      ajouterMessage(question, "user");
+      const chat = document.getElementById("chat");
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = "Toi: " + question;
+      chat.appendChild(userMsg);
 
-      if (base[question]) {
-        ajouterMessage(base[question], "ia");
-      } else {
-        const ajout = prompt("Je ne connais pas encore cette réponse. Veux-tu l’ajouter ?");
-        if (ajout) {
-          base[question] = ajout;
-          enregistrer();
-          ajouterMessage("Merci, je m'en souviendrai.", "ia");
-        } else {
-          ajouterMessage("D’accord, une autre fois peut-être.", "ia");
-        }
-      }
+      const base = JSON.parse(localStorage.getItem('jonas_base')) || {};
+      const reponse = base[question] || "Désolé, je ne connais pas encore la réponse à cette question.";
+
+      const botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+      botMsg.textContent = "Jonas: " + reponse;
+      chat.appendChild(botMsg);
 
       input.value = "";
+      chat.scrollTop = chat.scrollHeight;
     }
+
+    // Envoyer avec Entrée
+    document.getElementById("userInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
   </script>
 </body>
 </html>
+
 
 
