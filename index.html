@@ -1,144 +1,88 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jonas Assistance</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: #ffffff;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #00BFFF;
-    }
-    #chat {
-      width: 90%;
-      max-width: 700px;
-      height: 400px;
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 10px;
-      overflow-y: auto;
-      padding: 15px;
-      margin-bottom: 10px;
-    }
-    .user, .bot {
-      margin: 10px 0;
-    }
-    .user {
-      text-align: right;
-      color: #00ff88;
-    }
-    .bot {
-      text-align: left;
-      color: #FFD700;
-    }
-    #userInput {
-      width: 90%;
-      max-width: 700px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background-color: #00BFFF;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #009ACD;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Jonas Assistance</title>
+<style>
+  body { background: #121212; color: #eee; font-family: Arial, sans-serif; }
+  #chat { height: 400px; overflow-y: auto; border: 1px solid #555; padding: 10px; margin-bottom: 10px; background: #222; }
+  .message { margin: 5px 0; }
+  .user { color: #6cf; }
+  .bot { color: #9f9; }
+</style>
 </head>
 <body>
-  <h1>Jonas Assistance</h1>
-  <div id="chat"></div>
-  <input type="text" id="userInput" placeholder="Pose une question..." onkeypress="if(event.key==='Enter') sendMessage()">
-  <button onclick="sendMessage()">Envoyer</button>
 
-  <script>
-    const base = JSON.parse(localStorage.getItem('jonas_base')) || {
-      "bonjour": "Bonjour ! Comment puis-je t’aider ?",
-      "salut": "Salut à toi !",
-      "comment vas-tu": "Je vais bien, merci. Et toi ?",
-      "qui es-tu": "Je suis Jonas Assistance, ton assistant personnel et intelligent.",
-      "qui est ton créateur": "Mon créateur est Jonas Sleiman.",
-      "qui est jonas sleiman": "Jonas Sleiman est le créateur de cette intelligence artificielle.",
-      "quelle est la capitale de la france": "La capitale de la France est Paris.",
-      "quelle est la capitale du japon": "La capitale du Japon est Tokyo.",
-      "quelle est la capitale du canada": "La capitale du Canada est Ottawa.",
-      "quelle est la capitale du brésil": "La capitale du Brésil est Brasília.",
-      "combien font 5 + 5": "5 + 5 = 10.",
-      "quelle est la couleur du ciel": "Le ciel est généralement bleu quand il fait beau.",
-      "quel est l’océan le plus grand": "L’océan Pacifique est le plus vaste du monde.",
-      "combien de continents existe-t-il": "Il y a 7 continents.",
-      "combien de dents a un adulte": "Un adulte a généralement 32 dents.",
-      "qu’est-ce que l’ia": "L’intelligence artificielle désigne les machines capables de simuler l’intelligence humaine.",
-      "qu’est-ce que javascript": "JavaScript est un langage de programmation utilisé sur les sites web.",
-      "que veut dire css": "CSS signifie Cascading Style Sheets, utilisé pour la mise en page des sites web.",
-      "que signifie html": "HTML signifie HyperText Markup Language.",
-      "qui est zinedine zidane": "Zidane est un ancien joueur de football français et un entraîneur célèbre.",
-      "quelle est la vitesse de la lumière": "Environ 299 792 kilomètres par seconde.",
-      "qui a inventé internet": "Tim Berners-Lee est l’un des pionniers d’Internet.",
-      "qui est albert einstein": "Albert Einstein est un physicien célèbre pour la théorie de la relativité.",
-      "qui est marie curie": "Marie Curie est une scientifique connue pour ses recherches sur la radioactivité.",
-      "qui est elon musk": "Elon Musk est un entrepreneur connu pour SpaceX, Tesla et d'autres projets technologiques.",
-      "quelle est la formule de l'eau": "La formule chimique de l'eau est H₂O.",
-      "qui a découvert l'amérique": "Christophe Colomb est souvent crédité de la découverte de l'Amérique en 1492.",
-      "comment on dit bonjour en espagnol": "On dit 'Hola'.",
-      "quel âge a la terre": "La Terre a environ 4,5 milliards d’années.",
-      "quel est le plus grand désert": "L’Antarctique est le plus grand désert du monde.",
-      "quel est le plus grand animal": "La baleine bleue est le plus grand animal vivant.",
-      "comment fonctionne un volcan": "Un volcan fonctionne par l'accumulation de magma qui, sous pression, est expulsé à la surface.",
-      "qu’est-ce qu’un atome": "Un atome est la plus petite unité constitutive de la matière.",
-      "quel est le plus haut sommet du monde": "L’Everest est le plus haut sommet du monde."
-      // Tu peux en ajouter encore + ici !
-    };
+<div id="chat"></div>
+<input type="text" id="userInput" placeholder="Pose ta question..." autocomplete="off" />
+<button onclick="sendMessage()">Envoyer</button>
 
-    localStorage.setItem('jonas_base', JSON.stringify(base));
+<script>
+let base = {
+  "comment vas-tu": "Je vais bien, merci.",
+  "qui es-tu": "Je suis Jonas Assistance, ton assistant intelligent.",
+  "qui est ton créateur": "Mon créateur est Jonas Sleiman.",
+  "quelle est la capitale de la france": "La capitale de la France est Paris.",
+  "quel est le plus grand animal": "La baleine bleue est le plus grand animal vivant.",
+  // ... ajoute ici toutes tes 500 questions-réponses ...
+};
 
-    function nettoyerTexte(texte) {
-      return texte.toLowerCase()
-        .normalize("NFD")
-        .replace(/\p{Diacritic}/gu, "")
-        .replace(/[^a-z0-9\s]/gi, "")
-        .trim();
+// Charger la base depuis localStorage si elle existe
+const storedBase = localStorage.getItem('jonas_base');
+if (storedBase) {
+  base = JSON.parse(storedBase);
+}
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("userInput");
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = "message " + sender;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function sendMessage() {
+  const question = input.value.trim().toLowerCase();
+  if (!question) return;
+  
+  addMessage("Toi : " + input.value, "user");
+  input.value = "";
+
+  if (base[question]) {
+    // Réponse connue
+    addMessage("Jonas : " + base[question], "bot");
+  } else {
+    // Réponse inconnue => demander à l'utilisateur
+    addMessage("Jonas : Je ne connais pas la réponse. Peux-tu me la dire ?", "bot");
+    waitForAnswer(question);
+  }
+}
+
+function waitForAnswer(question) {
+  input.disabled = false;
+  input.focus();
+
+  function handleAnswer(event) {
+    if (event.key === "Enter") {
+      const answer = input.value.trim();
+      if (answer) {
+        addMessage("Toi (réponse) : " + answer, "user");
+        base[question] = answer;
+        localStorage.setItem('jonas_base', JSON.stringify(base));
+        addMessage("Jonas : Merci, j'ai appris quelque chose de nouveau !", "bot");
+        input.value = "";
+        input.removeEventListener("keydown", handleAnswer);
+      }
     }
+  }
 
-    function sendMessage() {
-      const input = document.getElementById("userInput");
-      const question = nettoyerTexte(input.value);
-      if (!question) return;
+  input.addEventListener("keydown", handleAnswer);
+}
 
-      const chat = document.getElementById("chat");
-      const userDiv = document.createElement("div");
-      userDiv.className = "user";
-      userDiv.textContent = input.value;
-      chat.appendChild(userDiv);
-
-      let reponse = base[question] || "Désolé, je ne connais pas la réponse à cette question.";
-
-      const botDiv = document.createElement("div");
-      botDiv.className = "bot";
-      botDiv.textContent = reponse;
-      chat.appendChild(botDiv);
-
-      input.value = "";
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
+</script>
 </body>
 </html>
 
